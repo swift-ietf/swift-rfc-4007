@@ -13,5 +13,5 @@
 // exports.swift
 // swift-rfc-4007
 
-@_exported public import ASCII
+@_exported public import ASCII_Serializer_Primitives
 @_exported public import RFC_5952
