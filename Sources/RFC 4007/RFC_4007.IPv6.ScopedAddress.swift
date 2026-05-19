@@ -140,7 +140,7 @@ extension String {
     /// This is a convenience transformation that composes through the canonical
     /// byte representation:
     /// ```
-    /// IPv6.ScopedAddress → [UInt8] (ASCII) → String (UTF-8 interpretation)
+    /// IPv6.ScopedAddress → [Byte] (ASCII) → String (UTF-8 interpretation)
     /// ```
     ///
     /// This follows RFC 4007 Section 11.7 format:
@@ -154,7 +154,7 @@ extension String {
     /// ## Category Theory
     ///
     /// This is functor composition - the String transformation is derived from
-    /// the more universal [UInt8] transformation. ASCII is a subset of UTF-8,
+    /// the more universal [Byte] transformation. ASCII is a subset of UTF-8,
     /// so this conversion is always safe.
     ///
     /// ## Examples
@@ -187,11 +187,11 @@ extension RFC_4007.IPv6.ScopedAddress: Binary.ASCII.Serializable {
     public static func serialize<Buffer: RangeReplaceableCollection>(
         ascii scopedAddress: Self,
         into buffer: inout Buffer
-    ) where Buffer.Element == UInt8 {
+    ) where Buffer.Element == Byte {
         buffer.append(ascii: scopedAddress.address)
         if let zone = scopedAddress.zone {
             // RFC 4007 Section 11.7: Format is <address>%<zone_id>
-            buffer.append(.ascii.percentSign)
+            buffer.append(ASCII.Code.percentSign)
             buffer.append(contentsOf: zone.utf8)
         }
     }
@@ -203,31 +203,31 @@ extension RFC_4007.IPv6.ScopedAddress: Binary.ASCII.Serializable {
     /// ## Category Theory
     ///
     /// Parsing transformation:
-    /// - **Domain**: [UInt8] (ASCII bytes)
+    /// - **Domain**: [Byte] (ASCII bytes)
     /// - **Codomain**: RFC_4007.IPv6.ScopedAddress (structured data)
     ///
     /// String parsing is derived composition:
     /// ```
-    /// String → [UInt8] (UTF-8) → ScopedAddress
+    /// String → [Byte] (UTF-8) → ScopedAddress
     /// ```
     ///
     /// ## Examples
     ///
     /// ```swift
     /// // With zone identifier
-    /// let bytes1 = Array("fe80::1%eth0".utf8)
+    /// let bytes1 = Array<Byte>("fe80::1%eth0".utf8)
     /// let scoped1 = try RFC_4007.IPv6.ScopedAddress(ascii: bytes1)
     ///
     /// // Without zone identifier
-    /// let bytes2 = Array("2001:db8::1".utf8)
+    /// let bytes2 = Array<Byte>("2001:db8::1".utf8)
     /// let scoped2 = try RFC_4007.IPv6.ScopedAddress(ascii: bytes2)
     /// ```
     public init<Bytes: Collection>(ascii bytes: Bytes, in context: Context = ()) throws(Error)
-    where Bytes.Element == UInt8 {
+    where Bytes.Element == Byte {
         guard !bytes.isEmpty else { throw Error.empty }
 
         // Find the '%' separator
-        if let percentIndex = bytes.firstIndex(of: UInt8.ascii.percentSign) {
+        if let percentIndex = bytes.firstIndex(of: ASCII.Code.percentSign.byte) {
             // Split address and zone
             let addressBytes = bytes[..<percentIndex]
             let zoneBytes = bytes[bytes.index(after: percentIndex)...]
