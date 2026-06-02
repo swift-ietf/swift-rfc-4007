@@ -25,9 +25,9 @@ let package = Package(
         .library(name: "RFC 4007", targets: ["RFC 4007"])
     ],
     dependencies: [
-        .package(path: "../swift-rfc-5952"),
-        .package(path: "../../swift-primitives/swift-standard-library-extensions"),
-        .package(path: "../../swift-primitives/swift-ascii-serializer-primitives")
+        .package(url: "https://github.com/swift-ietf/swift-rfc-5952.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-standard-library-extensions.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-ascii-serializer-primitives.git", branch: "main")
     ],
     targets: [
         .target(
