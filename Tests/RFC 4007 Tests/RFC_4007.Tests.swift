@@ -244,4 +244,68 @@ struct RFC4007Tests {
         #expect(scoped.requiresZone == false)
         #expect(String(scoped) == "2001:db8::1")
     }
+
+    // MARK: - ASCII.Parseable / round-trip ([FAM-012] text-only sibling)
+
+    @Test
+    func `ASCII.Parseable: parse with zone`() throws {
+        let scoped = try RFC_4007.IPv6.ScopedAddress(ascii: Array("fe80::1%eth0".utf8.map { Byte($0) }))
+
+        #expect(scoped.address == RFC_4291.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1))
+        #expect(scoped.zone == "eth0")
+    }
+
+    @Test
+    func `ASCII.Parseable: parse without zone`() throws {
+        let scoped = try RFC_4007.IPv6.ScopedAddress(ascii: Array("2001:db8::1".utf8.map { Byte($0) }))
+
+        #expect(scoped.address == RFC_4291.IPv6.Address(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1))
+        #expect(scoped.zone == nil)
+    }
+
+    @Test
+    func `ASCII round-trip: parse then serialize then parse is identity, canonical string is golden`() throws {
+        // Golden canonical RFC 4007 §11.7 forms (RFC 5952 canonical address + optional %zone).
+        let golden = [
+            "fe80::1%eth0",
+            "fe80::1%1",
+            "2001:db8::1",
+            "ff02::1%eth0",
+            "fe80::200:5eff:fe00:1%eth1",
+            "::"
+        ]
+        for text in golden {
+            let parsed = try RFC_4007.IPv6.ScopedAddress(ascii: Array(text.utf8.map { Byte($0) }))
+            let serialized = String(parsed)                       // via ASCII.Serializable verb
+            #expect(serialized == text)                           // golden canonical string
+            let reparsed = try RFC_4007.IPv6.ScopedAddress(ascii: Array(serialized.utf8.map { Byte($0) }))
+            #expect(parsed == reparsed)                           // parse ∘ serialize ∘ parse identity
+        }
+    }
+
+    @Test
+    func `ASCII.Parseable: malformed inputs throw`() throws {
+        // Empty input.
+        #expect(throws: RFC_4007.IPv6.ScopedAddress.Error.self) {
+            _ = try RFC_4007.IPv6.ScopedAddress(ascii: Array<Byte>())
+        }
+        // Trailing '%' with no zone.
+        #expect(throws: RFC_4007.IPv6.ScopedAddress.Error.self) {
+            _ = try RFC_4007.IPv6.ScopedAddress(ascii: Array("fe80::1%".utf8.map { Byte($0) }))
+        }
+        // Leading '%' with no address.
+        #expect(throws: RFC_4007.IPv6.ScopedAddress.Error.self) {
+            _ = try RFC_4007.IPv6.ScopedAddress(ascii: Array("%eth0".utf8.map { Byte($0) }))
+        }
+    }
+
+    @Test
+    func `RawRepresentable round-trips through canonical text`() throws {
+        let address = RFC_4291.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1)
+        let scoped = RFC_4007.IPv6.ScopedAddress(address: address, zone: "eth0")
+
+        #expect(scoped.rawValue == "fe80::1%eth0")
+        #expect(RFC_4007.IPv6.ScopedAddress(rawValue: "fe80::1%eth0") == scoped)
+        #expect(RFC_4007.IPv6.ScopedAddress(rawValue: "not an address") == nil)
+    }
 }

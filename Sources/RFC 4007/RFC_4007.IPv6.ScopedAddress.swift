@@ -16,6 +16,7 @@
 // IPv6 Scoped Address with Zone Identifier
 
 public import ASCII_Serializer_Primitives
+public import Parseable_ASCII_Primitives
 
 extension RFC_4007.IPv6 {
     /// IPv6 Scoped Address (RFC 4007)
@@ -175,54 +176,65 @@ extension String {
     public init(
         _ scopedAddress: RFC_4007.IPv6.ScopedAddress
     ) {
-        // Compose through canonical byte representation
-        // ASCII ⊂ UTF-8, so this is always valid
-        self.init(ascii: scopedAddress)
+        // Materialize the RFC 4007 §11.7 text form via the [FAM-012]
+        // `ASCII.Serializable` verb (through `.asciiCodes`); ASCII ⊂ UTF-8, so
+        // decoding the ASCII codes as UTF-8 is always valid.
+        self.init(decoding: scopedAddress.asciiCodes.map(\.underlying), as: UTF8.self)
     }
 }
 
-extension RFC_4007.IPv6.ScopedAddress: Binary.ASCII.Serializable {
-    public typealias Context = Void
+// MARK: - ASCII.Serializable ([FAM-012] text-only sibling — RFC 4007 §6: zone never on wire)
 
+extension RFC_4007.IPv6.ScopedAddress: ASCII.Serializable {
+    /// Serializes the scoped address as RFC 4007 §11.7 text `<address>%<zone_id>`.
+    ///
+    /// [FAM-012] text-only sibling. A scoped address has **no wire form**: per RFC
+    /// 4007 §6 the zone identifier is node-local and MUST NOT be sent on the wire,
+    /// so `ScopedAddress` conforms `ASCII.Serializable` ONLY — there is no
+    /// `Binary.Serializable` peer (a wire verb could only drop the zone, which is
+    /// redundant with the address's own wire form, or transmit it, which the spec
+    /// forbids; neither is a valid distinct scoped-address binary form).
+    ///
+    /// Clause-9 composition: the address component composes
+    /// ``RFC_4291/IPv6/Address``'s same-format (`ASCII.Code`) verb directly into
+    /// the sink — the RFC 5952 canonical text form served by swift-rfc-5952 — then
+    /// appends the `%` separator and the zone characters.
     public static func serialize<Buffer: RangeReplaceableCollection>(
-        ascii scopedAddress: Self,
+        _ scopedAddress: Self,
         into buffer: inout Buffer
-    ) where Buffer.Element == Byte {
-        buffer.append(ascii: scopedAddress.address)
+    ) where Buffer.Element == ASCII.Code {
+        // Address component: the RFC 5952 canonical ASCII verb, composed directly
+        // into the ASCII.Code sink (NOT via a [Byte] detour) — clause-9.
+        RFC_4291.IPv6.Address.serialize(scopedAddress.address, into: &buffer)
         if let zone = scopedAddress.zone {
-            // RFC 4007 Section 11.7: Format is <address>%<zone_id>
+            // RFC 4007 §11.7: Format is <address>%<zone_id>
             buffer.append(ASCII.Code.percentSign)
-            buffer.append(contentsOf: zone.utf8)
+            for byte in zone.utf8 { buffer.append(ASCII.Code(byte)) }
         }
     }
+}
 
-    /// Creates a scoped IPv6 address from ASCII bytes
+// MARK: - ASCII.Parseable ([FAM-012] parse — free-standing init)
+
+extension RFC_4007.IPv6.ScopedAddress: ASCII.Parseable {
+
+    /// Creates a scoped IPv6 address from ASCII bytes (AUTHORITATIVE IMPLEMENTATION)
     ///
-    /// Parses RFC 4007 format: `<address>%<zone_id>`
-    ///
-    /// ## Category Theory
-    ///
-    /// Parsing transformation:
-    /// - **Domain**: [Byte] (ASCII bytes)
-    /// - **Codomain**: RFC_4007.IPv6.ScopedAddress (structured data)
-    ///
-    /// String parsing is derived composition:
-    /// ```
-    /// String → [Byte] (UTF-8) → ScopedAddress
-    /// ```
+    /// Parses RFC 4007 format: `<address>%<zone_id>`. The address component is
+    /// parsed by ``RFC_4291/IPv6/Address``'s `init(ascii:)` (RFC 4291 §2.2 text
+    /// grammar, via swift-rfc-5952); the zone identifier is the remaining UTF-8
+    /// slice after the `%` separator.
     ///
     /// ## Examples
     ///
     /// ```swift
     /// // With zone identifier
-    /// let bytes1 = Array<Byte>("fe80::1%eth0".utf8)
-    /// let scoped1 = try RFC_4007.IPv6.ScopedAddress(ascii: bytes1)
+    /// let scoped1 = try RFC_4007.IPv6.ScopedAddress(ascii: Array<Byte>("fe80::1%eth0".utf8))
     ///
     /// // Without zone identifier
-    /// let bytes2 = Array<Byte>("2001:db8::1".utf8)
-    /// let scoped2 = try RFC_4007.IPv6.ScopedAddress(ascii: bytes2)
+    /// let scoped2 = try RFC_4007.IPv6.ScopedAddress(ascii: Array<Byte>("2001:db8::1".utf8))
     /// ```
-    public init<Bytes: Collection>(ascii bytes: Bytes, in context: Context = ()) throws(Error)
+    public init<Bytes: Collection>(ascii bytes: Bytes) throws(Error)
     where Bytes.Element == Byte {
         guard !bytes.isEmpty else { throw Error.empty }
 
@@ -235,7 +247,7 @@ extension RFC_4007.IPv6.ScopedAddress: Binary.ASCII.Serializable {
             guard !addressBytes.isEmpty else { throw Error.missingAddress }
             guard !zoneBytes.isEmpty else { throw Error.missingZone }
 
-            // Parse address using RFC 5952
+            // Parse address using RFC 4291 §2.2 text grammar
             let address: RFC_4291.IPv6.Address
             do {
                 address = try RFC_4291.IPv6.Address(ascii: addressBytes)
@@ -243,7 +255,7 @@ extension RFC_4007.IPv6.ScopedAddress: Binary.ASCII.Serializable {
                 throw Error.invalidAddress(error)
             }
 
-            // Zone is just a string - validate it's valid UTF-8
+            // Zone is just a string - decode the remaining bytes as UTF-8
             let zone = String(decoding: zoneBytes, as: UTF8.self)
 
             self.init(__unchecked: (), address: address, zone: zone)
@@ -261,12 +273,26 @@ extension RFC_4007.IPv6.ScopedAddress: Binary.ASCII.Serializable {
     }
 }
 
+// MARK: - RawRepresentable
+
+extension RFC_4007.IPv6.ScopedAddress: Swift.RawRepresentable {
+    /// The canonical RFC 4007 §11.7 `<address>%<zone_id>` string form.
+    ///
+    /// Re-provides `Swift.RawRepresentable` directly — the retired deprecated
+    /// ASCII serialization attachments no longer synthesize it.
+    public var rawValue: String { description }
+
+    /// Creates a scoped address by parsing `rawValue`, or `nil` if it is malformed.
+    public init?(rawValue: String) {
+        try? self.init(ascii: rawValue.utf8.map { Byte($0) })
+    }
+}
+
 // MARK: - CustomStringConvertible
 
 extension RFC_4007.IPv6.ScopedAddress: CustomStringConvertible {
-    /// The text representation of this scoped address
-    ///
-    /// Delegates to the String transformation for RFC 4007 compliance.
+    /// The RFC 4007 §11.7 `<address>%<zone_id>` text form — the same grammar the
+    /// `ASCII.Serializable` verb emits (routed through the `String` transformation).
     public var description: String {
         String(self)
     }
