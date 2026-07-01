@@ -249,7 +249,9 @@ struct RFC4007Tests {
 
     @Test
     func `ASCII.Parseable: parse with zone`() throws {
-        let scoped = try RFC_4007.IPv6.ScopedAddress(ascii: Array("fe80::1%eth0".utf8.map { Byte($0) }))
+        let scoped = try RFC_4007.IPv6.ScopedAddress(
+            ascii: Array("fe80::1%eth0".utf8.map { Byte($0) })
+        )
 
         #expect(scoped.address == RFC_4291.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1))
         #expect(scoped.zone == "eth0")
@@ -257,14 +259,16 @@ struct RFC4007Tests {
 
     @Test
     func `ASCII.Parseable: parse without zone`() throws {
-        let scoped = try RFC_4007.IPv6.ScopedAddress(ascii: Array("2001:db8::1".utf8.map { Byte($0) }))
+        let scoped = try RFC_4007.IPv6.ScopedAddress(
+            ascii: Array("2001:db8::1".utf8.map { Byte($0) })
+        )
 
         #expect(scoped.address == RFC_4291.IPv6.Address(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1))
         #expect(scoped.zone == nil)
     }
 
     @Test
-    func `ASCII round-trip: parse then serialize then parse is identity, canonical string is golden`() throws {
+    func `ASCII round-trip: parse-serialize-parse identity, canonical string golden`() throws {
         // Golden canonical RFC 4007 §11.7 forms (RFC 5952 canonical address + optional %zone).
         let golden = [
             "fe80::1%eth0",
@@ -272,14 +276,16 @@ struct RFC4007Tests {
             "2001:db8::1",
             "ff02::1%eth0",
             "fe80::200:5eff:fe00:1%eth1",
-            "::"
+            "::",
         ]
         for text in golden {
             let parsed = try RFC_4007.IPv6.ScopedAddress(ascii: Array(text.utf8.map { Byte($0) }))
-            let serialized = String(parsed)                       // via ASCII.Serializable verb
-            #expect(serialized == text)                           // golden canonical string
-            let reparsed = try RFC_4007.IPv6.ScopedAddress(ascii: Array(serialized.utf8.map { Byte($0) }))
-            #expect(parsed == reparsed)                           // parse ∘ serialize ∘ parse identity
+            let serialized = String(parsed)  // via ASCII.Serializable verb
+            #expect(serialized == text)  // golden canonical string
+            let reparsed = try RFC_4007.IPv6.ScopedAddress(
+                ascii: Array(serialized.utf8.map { Byte($0) })
+            )
+            #expect(parsed == reparsed)  // parse ∘ serialize ∘ parse identity
         }
     }
 
@@ -287,7 +293,7 @@ struct RFC4007Tests {
     func `ASCII.Parseable: malformed inputs throw`() throws {
         // Empty input.
         #expect(throws: RFC_4007.IPv6.ScopedAddress.Error.self) {
-            _ = try RFC_4007.IPv6.ScopedAddress(ascii: Array<Byte>())
+            _ = try RFC_4007.IPv6.ScopedAddress(ascii: [Byte]())
         }
         // Trailing '%' with no zone.
         #expect(throws: RFC_4007.IPv6.ScopedAddress.Error.self) {
