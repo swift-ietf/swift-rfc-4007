@@ -249,7 +249,7 @@ extension RFC_4007.IPv6.ScopedAddress: ASCII.Parseable {
 
             // Parse address using RFC 4291 §2.2 text grammar
             let address: RFC_4291.IPv6.Address
-            do {
+            do throws(RFC_4291.IPv6.Address.Error) {
                 address = try RFC_4291.IPv6.Address(ascii: addressBytes)
             } catch {
                 throw Error.invalidAddress(error)
@@ -262,7 +262,7 @@ extension RFC_4007.IPv6.ScopedAddress: ASCII.Parseable {
         } else {
             // No zone identifier - just an address
             let address: RFC_4291.IPv6.Address
-            do {
+            do throws(RFC_4291.IPv6.Address.Error) {
                 address = try RFC_4291.IPv6.Address(ascii: bytes)
             } catch {
                 throw Error.invalidAddress(error)
