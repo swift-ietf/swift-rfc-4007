@@ -30,12 +30,16 @@ extension RFC_4007.IPv6.ScopedAddress.Error: CustomStringConvertible {
         switch self {
         case .empty:
             return "Scoped address cannot be empty"
+
         case .invalidAddress(let error):
             return "Invalid IPv6 address: \(error)"
+
         case .invalidZone(let value):
             return "Invalid zone identifier: '\(value)'"
+
         case .missingAddress:
             return "Missing IPv6 address component"
+
         case .missingZone:
             return "Missing zone identifier after '%'"
         }

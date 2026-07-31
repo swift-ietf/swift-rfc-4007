@@ -284,7 +284,11 @@ extension RFC_4007.IPv6.ScopedAddress: Swift.RawRepresentable {
 
     /// Creates a scoped address by parsing `rawValue`, or `nil` if it is malformed.
     public init?(rawValue: String) {
-        try? self.init(ascii: rawValue.utf8.map { Byte($0) })
+        do throws(Error) {
+            try self.init(ascii: rawValue.utf8.map { Byte($0) })
+        } catch {
+            return nil
+        }
     }
 }
 
