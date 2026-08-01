@@ -72,8 +72,3 @@ import ASCII_Serializer_Primitives
 /// print(String(scoped))              // "fe80::1%eth0"
 /// ```
 public enum RFC_4007 {}
-
-/// IPv6 namespace for scoped addresses
-extension RFC_4007 {
-    public enum IPv6 {}
-}

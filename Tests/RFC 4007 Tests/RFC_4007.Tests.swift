@@ -17,7 +17,12 @@ import Testing
 
 @Suite("RFC 4007: IPv6 Scoped Address Tests")
 struct RFC4007Tests {
+    @Suite struct Unit {}
+    @Suite struct `Edge Case` {}
+    @Suite struct Integration {}
+}
 
+extension RFC4007Tests.Unit {
     // MARK: - Basic Construction
 
     @Test
@@ -310,6 +315,8 @@ struct RFC4007Tests {
         let address = RFC_4291.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1)
         let scoped = RFC_4007.IPv6.ScopedAddress(address: address, zone: "eth0")
 
+        // swift-linter:disable:next raw value access
+        // REASON: @testable same-package access exercising the RawRepresentable witness directly.
         #expect(scoped.rawValue == "fe80::1%eth0")
         #expect(RFC_4007.IPv6.ScopedAddress(rawValue: "fe80::1%eth0") == scoped)
         #expect(RFC_4007.IPv6.ScopedAddress(rawValue: "not an address") == nil)
