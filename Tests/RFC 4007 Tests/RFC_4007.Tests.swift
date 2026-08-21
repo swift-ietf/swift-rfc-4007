@@ -1,15 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// Copyright (c) 2025 Coen ten Thije Boonkkamp
-// Licensed under Apache License v2.0
-//
-// See LICENSE.txt for license information
-// See CONTRIBUTORS.txt for the list of project contributors
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-// ===----------------------------------------------------------------------===//
-
 import Testing
 
 @testable import RFC_4007
@@ -23,7 +11,6 @@ struct RFC4007Tests {
 }
 
 extension RFC4007Tests.Unit {
-    // MARK: - Basic Construction
 
     @Test
     func `ScopedAddress initialization with zone`() throws {
@@ -55,21 +42,17 @@ extension RFC4007Tests.Unit {
     func `ScopedAddress accepts StringProtocol types`() throws {
         let address = RFC_4291.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1)
 
-        // Test with Substring
         let fullString = "eth0_interface"
-        let substring = fullString.prefix(4)  // "eth0"
+        let substring = fullString.prefix(4)
         let scoped1 = RFC_4007.IPv6.ScopedAddress(address: address, zone: substring)
 
         #expect(scoped1.zone == "eth0")
         #expect(String(scoped1) == "fe80::1%eth0")
 
-        // Test with String
         let scoped2 = RFC_4007.IPv6.ScopedAddress(address: address, zone: "wlan0")
         #expect(scoped2.zone == "wlan0")
         #expect(String(scoped2) == "fe80::1%wlan0")
     }
-
-    // MARK: - Zone Requirements
 
     @Test
     func `Link-local addresses require zone`() throws {
@@ -77,7 +60,7 @@ extension RFC4007Tests.Unit {
         let scoped = RFC_4007.IPv6.ScopedAddress(address: linkLocal)
 
         #expect(scoped.requiresZone == true)
-        #expect(scoped.isProperlyScoped == false)  // No zone provided
+        #expect(scoped.isProperlyScoped == false)
     }
 
     @Test
@@ -104,7 +87,7 @@ extension RFC4007Tests.Unit {
         let scoped = RFC_4007.IPv6.ScopedAddress(address: global)
 
         #expect(scoped.requiresZone == false)
-        #expect(scoped.isProperlyScoped == true)  // No zone needed
+        #expect(scoped.isProperlyScoped == true)
     }
 
     @Test
@@ -115,8 +98,6 @@ extension RFC4007Tests.Unit {
         #expect(scoped.requiresZone == false)
         #expect(scoped.isProperlyScoped == true)
     }
-
-    // MARK: - String Representation (RFC 4007 Section 11.7)
 
     @Test
     func `RFC 4007 Section 11.7: Link-local with zone string format`() throws {
@@ -172,8 +153,6 @@ extension RFC4007Tests.Unit {
         #expect(scoped.description == "fe80::1%eth0")
     }
 
-    // MARK: - Equality & Hashing
-
     @Test
     func `Equality with same address and zone`() throws {
         let address = RFC_4291.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1)
@@ -218,8 +197,6 @@ extension RFC4007Tests.Unit {
         #expect(set.count == 3)
     }
 
-    // MARK: - Real-World Examples
-
     @Test
     func `Link-local on multiple interfaces`() throws {
         let address = RFC_4291.IPv6.Address(0xfe80, 0, 0, 0, 0x0200, 0x5eff, 0xfe00, 0x0001)
@@ -229,12 +206,12 @@ extension RFC4007Tests.Unit {
 
         #expect(String(eth0) == "fe80::200:5eff:fe00:1%eth0")
         #expect(String(eth1) == "fe80::200:5eff:fe00:1%eth1")
-        #expect(eth0 != eth1)  // Different zones distinguish them
+        #expect(eth0 != eth1)
     }
 
     @Test
     func `Multicast with zone`() throws {
-        // ff02::1 (all nodes link-local multicast)
+
         let multicast = RFC_4291.IPv6.Address(0xff02, 0, 0, 0, 0, 0, 0, 1)
         let scoped = RFC_4007.IPv6.ScopedAddress(address: multicast, zone: "eth0")
 
@@ -249,8 +226,6 @@ extension RFC4007Tests.Unit {
         #expect(scoped.requiresZone == false)
         #expect(String(scoped) == "2001:db8::1")
     }
-
-    // MARK: - ASCII.Parseable / round-trip ([FAM-012] text-only sibling)
 
     @Test
     func `ASCII.Parseable: parse with zone`() throws {
@@ -274,7 +249,7 @@ extension RFC4007Tests.Unit {
 
     @Test
     func `ASCII round-trip: parse-serialize-parse identity, canonical string golden`() throws {
-        // Golden canonical RFC 4007 §11.7 forms (RFC 5952 canonical address + optional %zone).
+
         let golden = [
             "fe80::1%eth0",
             "fe80::1%1",
@@ -285,26 +260,26 @@ extension RFC4007Tests.Unit {
         ]
         for text in golden {
             let parsed = try RFC_4007.IPv6.ScopedAddress(ascii: Array(text.utf8.map { Byte($0) }))
-            let serialized = String(parsed)  // via ASCII.Serializable verb
-            #expect(serialized == text)  // golden canonical string
+            let serialized = String(parsed)
+            #expect(serialized == text)
             let reparsed = try RFC_4007.IPv6.ScopedAddress(
                 ascii: Array(serialized.utf8.map { Byte($0) })
             )
-            #expect(parsed == reparsed)  // parse ∘ serialize ∘ parse identity
+            #expect(parsed == reparsed)
         }
     }
 
     @Test
     func `ASCII.Parseable: malformed inputs throw`() throws {
-        // Empty input.
+
         #expect(throws: RFC_4007.IPv6.ScopedAddress.Error.self) {
             _ = try RFC_4007.IPv6.ScopedAddress(ascii: [Byte]())
         }
-        // Trailing '%' with no zone.
+
         #expect(throws: RFC_4007.IPv6.ScopedAddress.Error.self) {
             _ = try RFC_4007.IPv6.ScopedAddress(ascii: Array("fe80::1%".utf8.map { Byte($0) }))
         }
-        // Leading '%' with no address.
+
         #expect(throws: RFC_4007.IPv6.ScopedAddress.Error.self) {
             _ = try RFC_4007.IPv6.ScopedAddress(ascii: Array("%eth0".utf8.map { Byte($0) }))
         }
@@ -315,8 +290,6 @@ extension RFC4007Tests.Unit {
         let address = RFC_4291.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1)
         let scoped = RFC_4007.IPv6.ScopedAddress(address: address, zone: "eth0")
 
-        // swift-linter:disable:next raw value access
-        // REASON: @testable same-package access exercising the RawRepresentable witness directly.
         #expect(scoped.rawValue == "fe80::1%eth0")
         #expect(RFC_4007.IPv6.ScopedAddress(rawValue: "fe80::1%eth0") == scoped)
         #expect(RFC_4007.IPv6.ScopedAddress(rawValue: "not an address") == nil)
