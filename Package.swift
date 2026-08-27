@@ -14,12 +14,12 @@ extension Target.Dependency {
         package: "swift-standard-library-extensions"
     )
     static let incits41986 = Self.product(
-        name: "ASCII Serializer Primitives",
-        package: "swift-ascii-serializer-primitives"
+        name: "ASCII Serializer",
+        package: "swift-ascii-serializer"
     )
     static let asciiParser = Self.product(
-        name: "Parseable ASCII Primitives",
-        package: "swift-ascii-parser-primitives"
+        name: "Parseable ASCII",
+        package: "swift-ascii-parser"
     )
 }
 
@@ -37,15 +37,15 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/swift-ietf/swift-rfc-5952.git", branch: "main"),
         .package(
-            url: "https://github.com/swift-primitives/swift-standard-library-extensions.git",
+            url: "https://github.com/swift-molecules/swift-standard-library-extensions.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-primitives/swift-ascii-serializer-primitives.git",
+            url: "https://github.com/swift-molecules/swift-ascii-serializer.git",
             branch: "main"
         ),
         .package(
-            url: "https://github.com/swift-primitives/swift-ascii-parser-primitives.git",
+            url: "https://github.com/swift-molecules/swift-ascii-parser.git",
             branch: "main"
         ),
     ],

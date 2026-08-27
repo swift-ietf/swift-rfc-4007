@@ -1,4 +1,4 @@
-import ASCII_Serializer_Primitives
+import ASCII_Serializer
 
 extension RFC_4007.IPv6.ScopedAddress {
     public enum Error: Swift.Error, Sendable, Equatable {
