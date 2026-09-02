@@ -116,7 +116,7 @@ extension RFC_4007.IPv6.ScopedAddress: Swift.RawRepresentable {
 
     public init?(rawValue: String) {
         do throws(Error) {
-            try self.init(ascii: rawValue.utf8.map { Byte($0) })
+            try self.init(ascii: rawValue.utf8.map { Byte(bitPattern: $0) })
         } catch {
             return nil
         }

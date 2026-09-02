@@ -230,7 +230,7 @@ extension RFC4007Tests.Unit {
     @Test
     func `ASCII.Parseable: parse with zone`() throws {
         let scoped = try RFC_4007.IPv6.ScopedAddress(
-            ascii: Array("fe80::1%eth0".utf8.map { Byte($0) })
+            ascii: Array("fe80::1%eth0".utf8.map { Byte(bitPattern: $0) })
         )
 
         #expect(scoped.address == RFC_4291.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1))
@@ -240,7 +240,7 @@ extension RFC4007Tests.Unit {
     @Test
     func `ASCII.Parseable: parse without zone`() throws {
         let scoped = try RFC_4007.IPv6.ScopedAddress(
-            ascii: Array("2001:db8::1".utf8.map { Byte($0) })
+            ascii: Array("2001:db8::1".utf8.map { Byte(bitPattern: $0) })
         )
 
         #expect(scoped.address == RFC_4291.IPv6.Address(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1))
@@ -259,11 +259,11 @@ extension RFC4007Tests.Unit {
             "::",
         ]
         for text in golden {
-            let parsed = try RFC_4007.IPv6.ScopedAddress(ascii: Array(text.utf8.map { Byte($0) }))
+            let parsed = try RFC_4007.IPv6.ScopedAddress(ascii: Array(text.utf8.map { Byte(bitPattern: $0) }))
             let serialized = String(parsed)
             #expect(serialized == text)
             let reparsed = try RFC_4007.IPv6.ScopedAddress(
-                ascii: Array(serialized.utf8.map { Byte($0) })
+                ascii: Array(serialized.utf8.map { Byte(bitPattern: $0) })
             )
             #expect(parsed == reparsed)
         }
@@ -277,11 +277,11 @@ extension RFC4007Tests.Unit {
         }
 
         #expect(throws: RFC_4007.IPv6.ScopedAddress.Error.self) {
-            _ = try RFC_4007.IPv6.ScopedAddress(ascii: Array("fe80::1%".utf8.map { Byte($0) }))
+            _ = try RFC_4007.IPv6.ScopedAddress(ascii: Array("fe80::1%".utf8.map { Byte(bitPattern: $0) }))
         }
 
         #expect(throws: RFC_4007.IPv6.ScopedAddress.Error.self) {
-            _ = try RFC_4007.IPv6.ScopedAddress(ascii: Array("%eth0".utf8.map { Byte($0) }))
+            _ = try RFC_4007.IPv6.ScopedAddress(ascii: Array("%eth0".utf8.map { Byte(bitPattern: $0) }))
         }
     }
 
