@@ -1,10 +1,9 @@
-import ASCII_Serializer
+public import RFC_4291
 
 extension RFC_4007.IPv6.ScopedAddress {
     public enum Error: Swift.Error, Sendable, Equatable {
         case empty
         case invalidAddress(_ underlying: RFC_4291.IPv6.Address.Error)
-        case invalidZone(_ value: String)
         case missingAddress
         case missingZone
     }
@@ -18,9 +17,6 @@ extension RFC_4007.IPv6.ScopedAddress.Error: CustomStringConvertible {
 
         case .invalidAddress(let error):
             return "Invalid IPv6 address: \(error)"
-
-        case .invalidZone(let value):
-            return "Invalid zone identifier: '\(value)'"
 
         case .missingAddress:
             return "Missing IPv6 address component"
