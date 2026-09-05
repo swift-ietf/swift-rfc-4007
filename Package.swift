@@ -11,36 +11,15 @@ let package = Package(
     ],
     products: [
         .library(name: "RFC 4007", targets: ["RFC 4007"]),
-        .library(
-            name: "RFC 4007 Foundation Integration",
-            targets: ["RFC 4007 Foundation Integration"]
-        ),
     ],
     dependencies: [
         .package(url: "https://github.com/swift-ietf/swift-rfc-4291.git", branch: "main"),
-        .package(url: "https://github.com/swift-ietf/swift-rfc-5952.git", branch: "main"),
     ],
     targets: [
         .target(
             name: "RFC 4007",
             dependencies: [
                 .product(name: "RFC 4291", package: "swift-rfc-4291")
-            ]
-        ),
-        .target(
-            name: "RFC 4007 Foundation Integration",
-            dependencies: [
-                .target(name: "RFC 4007"),
-                .product(name: "RFC 4291", package: "swift-rfc-4291"),
-                .product(name: "RFC 5952", package: "swift-rfc-5952"),
-            ]
-        ),
-        .testTarget(
-            name: "RFC 4007 Foundation Integration Tests",
-            dependencies: [
-                .target(name: "RFC 4007"),
-                .target(name: "RFC 4007 Foundation Integration"),
-                .product(name: "RFC 4291", package: "swift-rfc-4291"),
             ]
         ),
         .testTarget(
