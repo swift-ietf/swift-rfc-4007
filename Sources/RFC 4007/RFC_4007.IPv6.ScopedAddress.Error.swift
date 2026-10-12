@@ -1,7 +1,7 @@
 public import RFC_4291
 
 extension RFC_4007.IPv6.ScopedAddress {
-    public enum Error: Swift.Error, Sendable, Equatable {
+    public enum Error: Swift::Error, Sendable, Equatable {
         case empty
         case invalidAddress(_ underlying: RFC_4291.IPv6.Address.Error)
         case missingAddress
