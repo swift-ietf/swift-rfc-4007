@@ -24,7 +24,7 @@ let package = Package(
         .package(
             url: "https://github.com/swift-ietf/swift-rfc-4291.git",
             branch: "main",
-            traits: [.trait(name: "Coder", condition: .when(traits: ["Coder"]))]
+            traits: ["Coder"]
         ),
         .package(
             url: "https://github.com/swift-atoms/swift-ascii.git",
