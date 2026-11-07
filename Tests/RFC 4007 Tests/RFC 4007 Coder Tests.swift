@@ -9,14 +9,21 @@
     import Serializer
     import Testing
 
-    @Suite
-    struct `RFC 4007 Coder Tests` {
+extension `RFC 4007 Coder Tests`.`RFC 4007 Coder Tests` {
+        @Suite
+        struct `RFC 4007 Coder Tests` {
+        }
+}
+
+    extension `RFC 4007 Coder Tests`.`RFC 4007 Coder Tests`.`RFC 4007 Coder Tests` {
         @Suite struct `Coder Tests` {}
+
         @Suite struct `ASCII Tests` {}
+
         @Suite struct `Text Tests` {}
     }
 
-    extension `RFC 4007 Coder Tests`.`Coder Tests` {
+    extension `RFC 4007 Coder Tests`.`RFC 4007 Coder Tests`.`Coder Tests` {
 
         @Test
         func `reads an address with a zone and stops at the delimiter`() throws {
@@ -84,7 +91,7 @@
         }
     }
 
-    extension `RFC 4007 Coder Tests`.`ASCII Tests` {
+    extension `RFC 4007 Coder Tests`.`RFC 4007 Coder Tests`.`ASCII Tests` {
 
         @Test
         func `parses bytes with a zone`() throws {
@@ -140,7 +147,7 @@
         }
     }
 
-    extension `RFC 4007 Coder Tests`.`Text Tests` {
+    extension `RFC 4007 Coder Tests`.`RFC 4007 Coder Tests`.`Text Tests` {
 
         @Test
         func `a link-local address with a zone reads as RFC 4007 section 11.7 text`() {

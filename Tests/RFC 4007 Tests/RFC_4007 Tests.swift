@@ -2,13 +2,21 @@ import RFC_4007
 import RFC_4291
 import Testing
 
-@Suite
-struct `RFC 4007 Tests` {
+enum `RFC_4007 Tests` {}
+
+extension `RFC_4007 Tests` {
+    @Suite
+    struct `RFC 4007 Tests` {
+    }
+}
+
+extension `RFC_4007 Tests`.`RFC 4007 Tests` {
     @Suite struct `Scoped Address Tests` {}
+
     @Suite struct `Scope Tests` {}
 }
 
-extension `RFC 4007 Tests`.`Scoped Address Tests` {
+extension `RFC_4007 Tests`.`RFC 4007 Tests`.`Scoped Address Tests` {
 
     @Test
     func `holds an address and a zone`() {
@@ -36,7 +44,7 @@ extension `RFC 4007 Tests`.`Scoped Address Tests` {
     }
 }
 
-extension `RFC 4007 Tests`.`Scope Tests` {
+extension `RFC_4007 Tests`.`RFC 4007 Tests`.`Scope Tests` {
 
     @Test
     func `a link-local address requires a zone`() {
