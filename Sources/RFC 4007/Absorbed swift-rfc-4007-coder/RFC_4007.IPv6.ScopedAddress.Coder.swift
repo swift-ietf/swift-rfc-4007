@@ -14,7 +14,7 @@
         public static var coder: Coder<ArraySlice<Byte>, [Byte]> { .init() }
     }
 
-extension RFC_4007.IPv6.ScopedAddress.Coder {
+    extension RFC_4007.IPv6.ScopedAddress.Coder {
         public typealias Output = RFC_4007.IPv6.ScopedAddress
 
         public typealias Failure = RFC_4007.IPv6.ScopedAddress.Error
@@ -42,5 +42,5 @@ extension RFC_4007.IPv6.ScopedAddress.Coder {
                 return false
             }
         }
-}
+    }
 #endif
