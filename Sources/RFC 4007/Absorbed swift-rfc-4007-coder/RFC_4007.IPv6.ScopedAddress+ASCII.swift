@@ -28,14 +28,21 @@
             guard !addressBytes.isEmpty else { throw Error.missingAddress }
             guard !zoneBytes.isEmpty else { throw Error.missingZone }
 
+            let address: RFC_4291.IPv6.Address
             do throws(RFC_4291.IPv6.Address.Error) {
-                self.init(
-                    address: try RFC_4291.IPv6.Address(ascii: addressBytes),
-                    zone: String(decoding: zoneBytes, as: UTF8.self)
-                )
+                address = try RFC_4291.IPv6.Address(ascii: addressBytes)
             } catch {
                 throw Error.invalidAddress(error)
             }
+
+            let zone: Zone
+            do throws(Zone.Error) {
+                zone = try Zone(String(decoding: zoneBytes, as: UTF8.self))
+            } catch {
+                throw Error.invalidZone(error)
+            }
+
+            self.init(address: address, zone: zone)
         }
     }
 
@@ -50,7 +57,7 @@
             buffer.append(contentsOf: address)
             if let zone = scopedAddress.zone {
                 buffer.append(ASCII.Code.percentSign)
-                for byte in zone.utf8 { buffer.append(ASCII.Code(byte)) }
+                for byte in zone.rawValue.utf8 { buffer.append(ASCII.Code(byte)) }
             }
         }
 

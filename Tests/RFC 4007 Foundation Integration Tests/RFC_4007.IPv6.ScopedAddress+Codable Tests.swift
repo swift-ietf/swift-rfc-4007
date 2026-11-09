@@ -12,7 +12,7 @@
         func `a scoped address codes as its address and zone`() async throws {
             let scoped = RFC_4007.IPv6.ScopedAddress(
                 address: RFC_4291.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1),
-                zone: "eth0"
+                zone: try RFC_4007.IPv6.ScopedAddress.Zone("eth0")
             )
 
             let encoder = JSONEncoder()
@@ -33,6 +33,15 @@
 
             #expect(String(decoding: encoded, as: UTF8.self) == #"{"address":"2001:db8::1"}"#)
             #expect(try JSONDecoder().decode(RFC_4007.IPv6.ScopedAddress.self, from: encoded) == scoped)
+        }
+
+        @Test
+        func `a zone the text form cannot read back fails to decode`() async throws {
+            let encoded = Data(#"{"address":"fe80::1","zone":"eth 0"}"#.utf8)
+
+            #expect(throws: DecodingError.self) {
+                try JSONDecoder().decode(RFC_4007.IPv6.ScopedAddress.self, from: encoded)
+            }
         }
 
         @Test

@@ -6,19 +6,11 @@ extension RFC_4007.IPv6 {
 
         public let address: RFC_4291.IPv6.Address
 
-        public let zone: String?
-
-        public init<S: StringProtocol>(
-            address: RFC_4291.IPv6.Address,
-            zone: S?
-        ) {
-            self.address = address
-            self.zone = zone.map { String($0) }
-        }
+        public let zone: Zone?
 
         public init(
             address: RFC_4291.IPv6.Address,
-            zone: String? = nil
+            zone: Zone? = nil
         ) {
             self.address = address
             self.zone = zone

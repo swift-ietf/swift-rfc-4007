@@ -27,10 +27,21 @@
                     debugDescription: "\(error)"
                 )
             }
-            self.init(
-                address: address,
-                zone: try container.decodeIfPresent(String.self, forKey: .zone)
-            )
+            let zone: RFC_4007.IPv6.ScopedAddress.Zone?
+            if let text = try container.decodeIfPresent(String.self, forKey: .zone) {
+                do throws(RFC_4007.IPv6.ScopedAddress.Zone.Error) {
+                    zone = try RFC_4007.IPv6.ScopedAddress.Zone(text)
+                } catch {
+                    throw DecodingError.dataCorruptedError(
+                        forKey: .zone,
+                        in: container,
+                        debugDescription: "\(error)"
+                    )
+                }
+            } else {
+                zone = nil
+            }
+            self.init(address: address, zone: zone)
         }
 
         public func encode(to encoder: any Encoder) throws {
@@ -39,7 +50,7 @@
 
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(String(decoding: codes.map(\.underlying), as: UTF8.self), forKey: .address)
-            try container.encodeIfPresent(zone, forKey: .zone)
+            try container.encodeIfPresent(zone?.rawValue, forKey: .zone)
         }
     }
 #endif

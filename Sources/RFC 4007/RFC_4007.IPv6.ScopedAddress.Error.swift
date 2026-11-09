@@ -6,6 +6,7 @@ extension RFC_4007.IPv6.ScopedAddress {
         case invalidAddress(_ underlying: RFC_4291.IPv6.Address.Error)
         case missingAddress
         case missingZone
+        case invalidZone(_ underlying: RFC_4007.IPv6.ScopedAddress.Zone.Error)
     }
 }
 
@@ -23,6 +24,9 @@ extension RFC_4007.IPv6.ScopedAddress.Error: CustomStringConvertible {
 
         case .missingZone:
             return "Missing zone identifier after '%'"
+
+        case .invalidZone(let error):
+            return "Invalid zone identifier: \(error)"
         }
     }
 }
