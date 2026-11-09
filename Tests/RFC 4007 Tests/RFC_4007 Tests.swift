@@ -66,11 +66,11 @@ extension `RFC_4007 Tests`.`RFC 4007 Tests`.`Scope Tests` {
     }
 
     @Test
-    func `a unique local address requires a zone`() {
-        let scoped = RFC_4007.IPv6.ScopedAddress(address: RFC_4291.IPv6.Address(0xfc00, 0, 0, 0, 0, 0, 0, 1))
+    func `a unique local address has global scope per RFC 4193 section 3_3 and does not require a zone`() {
+        let scoped = RFC_4007.IPv6.ScopedAddress(address: RFC_4291.IPv6.Address(0xfd00, 0, 0, 0, 0, 0, 0, 1))
 
-        #expect(scoped.requiresZone)
-        #expect(!scoped.isProperlyScoped)
+        #expect(!scoped.requiresZone)
+        #expect(scoped.isProperlyScoped)
     }
 
     @Test

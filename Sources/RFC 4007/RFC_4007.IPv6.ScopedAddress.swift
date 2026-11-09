@@ -29,7 +29,7 @@ extension RFC_4007.IPv6 {
 extension RFC_4007.IPv6.ScopedAddress {
 
     public var requiresZone: Bool {
-        address.is.linkLocal || address.is.uniqueLocal
+        address.is.linkLocal
     }
 
     public var isProperlyScoped: Bool {
