@@ -57,7 +57,7 @@
             buffer.append(contentsOf: address)
             if let zone = scopedAddress.zone {
                 buffer.append(ASCII.Code.percentSign)
-                for byte in zone.rawValue.utf8 { buffer.append(ASCII.Code(byte)) }
+                for byte in zone.description.utf8 { buffer.append(ASCII.Code(byte)) }
             }
         }
 

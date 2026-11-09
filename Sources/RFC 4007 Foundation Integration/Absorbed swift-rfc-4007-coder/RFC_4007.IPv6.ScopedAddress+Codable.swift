@@ -50,7 +50,7 @@
 
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(String(decoding: codes.map(\.underlying), as: UTF8.self), forKey: .address)
-            try container.encodeIfPresent(zone?.rawValue, forKey: .zone)
+            try container.encodeIfPresent(zone?.description, forKey: .zone)
         }
     }
 #endif
