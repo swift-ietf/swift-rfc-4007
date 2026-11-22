@@ -1,15 +1,15 @@
 public import RFC_4291
 
-extension RFC_4007.IPv6 {
+extension IETF.RFC.`4007`.IPv6 {
 
     public struct ScopedAddress: Hashable, Sendable {
 
-        public let address: RFC_4291.IPv6.Address
+        public let address: IETF.RFC.`4291`.IPv6.Address
 
         public let zone: Zone?
 
         public init(
-            address: RFC_4291.IPv6.Address,
+            address: IETF.RFC.`4291`.IPv6.Address,
             zone: Zone? = nil
         ) {
             self.address = address
@@ -18,7 +18,7 @@ extension RFC_4007.IPv6 {
     }
 }
 
-extension RFC_4007.IPv6.ScopedAddress {
+extension IETF.RFC.`4007`.IPv6.ScopedAddress {
 
     public var requiresZone: Bool {
         address.is.linkLocal

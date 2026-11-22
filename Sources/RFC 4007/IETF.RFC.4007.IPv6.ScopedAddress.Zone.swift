@@ -1,4 +1,4 @@
-extension RFC_4007.IPv6.ScopedAddress {
+extension IETF.RFC.`4007`.IPv6.ScopedAddress {
 
     public struct Zone: Hashable, Sendable {
 
@@ -13,7 +13,7 @@ extension RFC_4007.IPv6.ScopedAddress {
     }
 }
 
-extension RFC_4007.IPv6.ScopedAddress.Zone {
+extension IETF.RFC.`4007`.IPv6.ScopedAddress.Zone {
 
     public init(_ text: some StringProtocol) throws(Error) {
         let rawValue = String(text)
@@ -34,7 +34,7 @@ extension RFC_4007.IPv6.ScopedAddress.Zone {
     }
 }
 
-extension RFC_4007.IPv6.ScopedAddress.Zone: CustomStringConvertible {
+extension IETF.RFC.`4007`.IPv6.ScopedAddress.Zone: CustomStringConvertible {
 
     public var description: String {
         rawValue

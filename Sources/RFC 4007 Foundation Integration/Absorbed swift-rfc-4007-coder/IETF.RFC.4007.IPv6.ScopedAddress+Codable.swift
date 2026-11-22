@@ -7,7 +7,7 @@
     import RFC_5952
     import Serializer
 
-    extension RFC_4007.IPv6.ScopedAddress: Encodable, Decodable {
+    extension IETF.RFC.`4007`.IPv6.ScopedAddress: Encodable, Decodable {
 
         private enum CodingKeys: String, CodingKey {
             case address
@@ -17,9 +17,9 @@
         public init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let text = try container.decode(String.self, forKey: .address)
-            let address: RFC_4291.IPv6.Address
-            do throws(RFC_4291.IPv6.Address.Error) {
-                address = try RFC_4291.IPv6.Address(ascii: text.utf8.map(Byte.init(bitPattern:)))
+            let address: IETF.RFC.`4291`.IPv6.Address
+            do throws(IETF.RFC.`4291`.IPv6.Address.Error) {
+                address = try IETF.RFC.`4291`.IPv6.Address(ascii: text.utf8.map(Byte.init(bitPattern:)))
             } catch {
                 throw DecodingError.dataCorruptedError(
                     forKey: .address,
@@ -27,10 +27,10 @@
                     debugDescription: "\(error)"
                 )
             }
-            let zone: RFC_4007.IPv6.ScopedAddress.Zone?
+            let zone: IETF.RFC.`4007`.IPv6.ScopedAddress.Zone?
             if let text = try container.decodeIfPresent(String.self, forKey: .zone) {
-                do throws(RFC_4007.IPv6.ScopedAddress.Zone.Error) {
-                    zone = try RFC_4007.IPv6.ScopedAddress.Zone(text)
+                do throws(IETF.RFC.`4007`.IPv6.ScopedAddress.Zone.Error) {
+                    zone = try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone(text)
                 } catch {
                     throw DecodingError.dataCorruptedError(
                         forKey: .zone,
@@ -46,7 +46,7 @@
 
         public func encode(to encoder: any Encoder) throws {
             var codes: [ASCII.Code] = []
-            RFC_4291.IPv6.Address.Text.Canonical().serialize(address, into: &codes)
+            IETF.RFC.`4291`.IPv6.Address.Text.Canonical().serialize(address, into: &codes)
 
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(String(decoding: codes.map(\.underlying), as: UTF8.self), forKey: .address)

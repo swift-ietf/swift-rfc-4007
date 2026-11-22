@@ -21,6 +21,7 @@ let package = Package(
         .trait(name: "Coder", description: "Wire coders for RFC 4007 types")
     ],
     dependencies: [
+        .package(url: "https://github.com/swift-ietf/swift-rfc.git", branch: "main"),
         .package(
             url: "https://github.com/swift-ietf/swift-rfc-4291.git",
             branch: "main",
@@ -69,6 +70,7 @@ let package = Package(
         .target(
             name: "RFC 4007",
             dependencies: [
+                .product(name: "IETF RFC", package: "swift-rfc"),
                 .product(name: "RFC 4291", package: "swift-rfc-4291"),
                 .product(name: "ASCII", package: "swift-ascii", condition: .when(traits: ["Coder"])),
                 .product(name: "Byte", package: "swift-byte", condition: .when(traits: ["Coder"])),

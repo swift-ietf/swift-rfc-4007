@@ -6,7 +6,7 @@
     import Parser
     import Serializer
 
-    extension RFC_4007.IPv6.ScopedAddress {
+    extension IETF.RFC.`4007`.IPv6.ScopedAddress {
         public struct Coder<Input: Cursor.`Protocol`<Byte, Never>, Buffer: RangeReplaceableCollection<Byte>>: Coding {
             public init() {}
         }
@@ -14,16 +14,16 @@
         public static var coder: Coder<ArraySlice<Byte>, [Byte]> { .init() }
     }
 
-    extension RFC_4007.IPv6.ScopedAddress.Coder {
-        public typealias Output = RFC_4007.IPv6.ScopedAddress
+    extension IETF.RFC.`4007`.IPv6.ScopedAddress.Coder {
+        public typealias Output = IETF.RFC.`4007`.IPv6.ScopedAddress
 
-        public typealias Failure = RFC_4007.IPv6.ScopedAddress.Error
+        public typealias Failure = IETF.RFC.`4007`.IPv6.ScopedAddress.Error
 
         public borrowing func parse(_ input: inout Input) throws(Failure) -> Output {
             let start = input.checkpoint
             let bytes = Scan.run(&input, while: Self.isScopedAddressByte)
             do throws(Failure) {
-                return try RFC_4007.IPv6.ScopedAddress(ascii: bytes)
+                return try IETF.RFC.`4007`.IPv6.ScopedAddress(ascii: bytes)
             } catch {
                 input.seek(to: start)
                 throw error

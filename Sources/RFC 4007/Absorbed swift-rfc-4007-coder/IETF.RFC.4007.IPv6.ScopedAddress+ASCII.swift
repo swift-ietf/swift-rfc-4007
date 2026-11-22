@@ -7,15 +7,15 @@
     import RFC_5952
     import RFC_5952
 
-    extension RFC_4007.IPv6.ScopedAddress: ASCII.Parseable {
+    extension IETF.RFC.`4007`.IPv6.ScopedAddress: ASCII.Parseable {
 
         public init<Bytes: Swift::Collection>(ascii bytes: Bytes) throws(Error)
         where Bytes.Element == Byte {
             guard !bytes.isEmpty else { throw Error.empty }
 
             guard let percentIndex = bytes.firstIndex(of: ASCII.Code.percentSign.byte) else {
-                do throws(RFC_4291.IPv6.Address.Error) {
-                    self.init(address: try RFC_4291.IPv6.Address(ascii: bytes))
+                do throws(IETF.RFC.`4291`.IPv6.Address.Error) {
+                    self.init(address: try IETF.RFC.`4291`.IPv6.Address(ascii: bytes))
                 } catch {
                     throw Error.invalidAddress(error)
                 }
@@ -28,9 +28,9 @@
             guard !addressBytes.isEmpty else { throw Error.missingAddress }
             guard !zoneBytes.isEmpty else { throw Error.missingZone }
 
-            let address: RFC_4291.IPv6.Address
-            do throws(RFC_4291.IPv6.Address.Error) {
-                address = try RFC_4291.IPv6.Address(ascii: addressBytes)
+            let address: IETF.RFC.`4291`.IPv6.Address
+            do throws(IETF.RFC.`4291`.IPv6.Address.Error) {
+                address = try IETF.RFC.`4291`.IPv6.Address(ascii: addressBytes)
             } catch {
                 throw Error.invalidAddress(error)
             }
@@ -46,14 +46,14 @@
         }
     }
 
-    extension RFC_4007.IPv6.ScopedAddress: ASCII.Serializable, Binary.Serializable {
+    extension IETF.RFC.`4007`.IPv6.ScopedAddress: ASCII.Serializable, Binary.Serializable {
 
         public static func serialize<Buffer: RangeReplaceableCollection>(
             _ scopedAddress: Self,
             into buffer: inout Buffer
         ) where Buffer.Element == ASCII.Code {
             var address: [ASCII.Code] = []
-            RFC_4291.IPv6.Address.Text.Canonical().serialize(scopedAddress.address, into: &address)
+            IETF.RFC.`4291`.IPv6.Address.Text.Canonical().serialize(scopedAddress.address, into: &address)
             buffer.append(contentsOf: address)
             if let zone = scopedAddress.zone {
                 buffer.append(ASCII.Code.percentSign)
