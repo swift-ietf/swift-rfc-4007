@@ -1,16 +1,16 @@
 public import RFC_4291
 
-extension IETF.RFC.`4007`.IPv6.ScopedAddress {
+extension IETF.RFC.`4007`.IPv6.Address {
     public enum Error: Swift::Error, Sendable, Equatable {
         case empty
         case invalidAddress(_ underlying: IETF.RFC.`4291`.IPv6.Address.Error)
         case missingAddress
         case missingZone
-        case invalidZone(_ underlying: IETF.RFC.`4007`.IPv6.ScopedAddress.Zone.Error)
+        case invalidZone(_ underlying: IETF.RFC.`4007`.IPv6.Address.Zone.Error)
     }
 }
 
-extension IETF.RFC.`4007`.IPv6.ScopedAddress.Error: CustomStringConvertible {
+extension IETF.RFC.`4007`.IPv6.Address.Error: CustomStringConvertible {
     public var description: String {
         switch self {
         case .empty:

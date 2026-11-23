@@ -2,14 +2,14 @@
     import ASCII
     import Byte
 
-    extension IETF.RFC.`4007`.IPv6.ScopedAddress: CustomStringConvertible {
+    extension IETF.RFC.`4007`.IPv6.Address: CustomStringConvertible {
 
         public var description: String {
             String(ascii: self)
         }
     }
 
-    extension IETF.RFC.`4007`.IPv6.ScopedAddress: LosslessStringConvertible {
+    extension IETF.RFC.`4007`.IPv6.Address: LosslessStringConvertible {
 
         public init?(_ description: String) {
             do throws(Error) {
@@ -20,7 +20,7 @@
         }
     }
 
-    extension IETF.RFC.`4007`.IPv6.ScopedAddress: Swift::RawRepresentable {
+    extension IETF.RFC.`4007`.IPv6.Address: Swift::RawRepresentable {
 
         public var rawValue: String { description }
 

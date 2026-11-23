@@ -26,7 +26,7 @@
         @Test
         func `reads an address with a zone and stops at the delimiter`() throws {
             var input: ArraySlice<Byte> = "fe80::1%eth0]/path"
-            let scoped = try IETF.RFC.`4007`.IPv6.ScopedAddress.coder.parse(&input)
+            let scoped = try IETF.RFC.`4007`.IPv6.Address.coder.parse(&input)
             #expect(scoped.address == IETF.RFC.`4291`.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1))
             #expect(scoped.zone?.rawValue == "eth0")
             #expect(input.first == Byte(bitPattern: 0x5D))
@@ -35,14 +35,14 @@
         @Test
         func `every zone a value can hold reads back through the coder`() throws {
             for text in ["eth0", "1", "en0.100", "wlan_0", "br-lan"] {
-                let scoped = IETF.RFC.`4007`.IPv6.ScopedAddress(
+                let scoped = IETF.RFC.`4007`.IPv6.Address(
                     address: IETF.RFC.`4291`.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1),
-                    zone: try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone(text)
+                    zone: try IETF.RFC.`4007`.IPv6.Address.Zone(text)
                 )
                 var bytes: [Byte] = []
-                try IETF.RFC.`4007`.IPv6.ScopedAddress.coder.serialize(scoped, into: &bytes)
+                try IETF.RFC.`4007`.IPv6.Address.coder.serialize(scoped, into: &bytes)
                 var encoded = bytes[...]
-                #expect(try IETF.RFC.`4007`.IPv6.ScopedAddress.coder.parse(&encoded) == scoped)
+                #expect(try IETF.RFC.`4007`.IPv6.Address.coder.parse(&encoded) == scoped)
                 #expect(encoded.isEmpty)
             }
         }
@@ -50,8 +50,8 @@
         @Test
         func `rejects a second percent sign in the zone`() {
             var input: ArraySlice<Byte> = "fe80::1%eth%0"
-            #expect(throws: IETF.RFC.`4007`.IPv6.ScopedAddress.Error.invalidZone(.invalidCharacter("eth%0", byte: 0x25))) {
-                try IETF.RFC.`4007`.IPv6.ScopedAddress.coder.parse(&input)
+            #expect(throws: IETF.RFC.`4007`.IPv6.Address.Error.invalidZone(.invalidCharacter("eth%0", byte: 0x25))) {
+                try IETF.RFC.`4007`.IPv6.Address.coder.parse(&input)
             }
             #expect(input.count == 13)
         }
@@ -59,7 +59,7 @@
         @Test
         func `reads an address without a zone`() throws {
             var input: ArraySlice<Byte> = "2001:db8::1 rest"
-            let scoped = try IETF.RFC.`4007`.IPv6.ScopedAddress.coder.parse(&input)
+            let scoped = try IETF.RFC.`4007`.IPv6.Address.coder.parse(&input)
             #expect(scoped.address == IETF.RFC.`4291`.IPv6.Address(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1))
             #expect(scoped.zone == nil)
             #expect(input.first == Byte(bitPattern: 0x20))
@@ -68,8 +68,8 @@
         @Test
         func `rejects a missing zone and restores the cursor`() {
             var input: ArraySlice<Byte> = "fe80::1%"
-            #expect(throws: IETF.RFC.`4007`.IPv6.ScopedAddress.Error.missingZone) {
-                try IETF.RFC.`4007`.IPv6.ScopedAddress.coder.parse(&input)
+            #expect(throws: IETF.RFC.`4007`.IPv6.Address.Error.missingZone) {
+                try IETF.RFC.`4007`.IPv6.Address.coder.parse(&input)
             }
             #expect(input.count == 8)
         }
@@ -77,38 +77,38 @@
         @Test
         func `rejects a missing address`() {
             var input: ArraySlice<Byte> = "%eth0"
-            #expect(throws: IETF.RFC.`4007`.IPv6.ScopedAddress.Error.missingAddress) {
-                try IETF.RFC.`4007`.IPv6.ScopedAddress.coder.parse(&input)
+            #expect(throws: IETF.RFC.`4007`.IPv6.Address.Error.missingAddress) {
+                try IETF.RFC.`4007`.IPv6.Address.coder.parse(&input)
             }
         }
 
         @Test
         func `rejects empty input`() {
             var input: ArraySlice<Byte> = ""
-            #expect(throws: IETF.RFC.`4007`.IPv6.ScopedAddress.Error.empty) {
-                try IETF.RFC.`4007`.IPv6.ScopedAddress.coder.parse(&input)
+            #expect(throws: IETF.RFC.`4007`.IPv6.Address.Error.empty) {
+                try IETF.RFC.`4007`.IPv6.Address.coder.parse(&input)
             }
         }
 
         @Test
         func `rejects a malformed address`() {
             var input: ArraySlice<Byte> = "fe80:::1%eth0"
-            #expect(throws: IETF.RFC.`4007`.IPv6.ScopedAddress.Error.self) {
-                try IETF.RFC.`4007`.IPv6.ScopedAddress.coder.parse(&input)
+            #expect(throws: IETF.RFC.`4007`.IPv6.Address.Error.self) {
+                try IETF.RFC.`4007`.IPv6.Address.coder.parse(&input)
             }
         }
 
         @Test
         func `round-trips through the canonical form`() throws {
-            let scoped = IETF.RFC.`4007`.IPv6.ScopedAddress(
+            let scoped = IETF.RFC.`4007`.IPv6.Address(
                 address: IETF.RFC.`4291`.IPv6.Address(0xfe80, 0, 0, 0x0200, 0x5eff, 0xfe00, 0x0001, 0),
-                zone: try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone("eth1")
+                zone: try IETF.RFC.`4007`.IPv6.Address.Zone("eth1")
             )
             var bytes: [Byte] = []
-            try IETF.RFC.`4007`.IPv6.ScopedAddress.coder.serialize(scoped, into: &bytes)
+            try IETF.RFC.`4007`.IPv6.Address.coder.serialize(scoped, into: &bytes)
             var encoded = bytes[...]
             #expect(encoded == "fe80::200:5eff:fe00:1:0%eth1")
-            #expect(try IETF.RFC.`4007`.IPv6.ScopedAddress.coder.parse(&encoded) == scoped)
+            #expect(try IETF.RFC.`4007`.IPv6.Address.coder.parse(&encoded) == scoped)
             #expect(encoded.isEmpty)
         }
     }
@@ -117,23 +117,23 @@
 
         @Test
         func `parses bytes with a zone`() throws {
-            let scoped = try IETF.RFC.`4007`.IPv6.ScopedAddress(ascii: "fe80::1%eth0" as [Byte])
+            let scoped = try IETF.RFC.`4007`.IPv6.Address(ascii: "fe80::1%eth0" as [Byte])
             #expect(scoped.address == IETF.RFC.`4291`.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1))
             #expect(scoped.zone?.rawValue == "eth0")
         }
 
         @Test
         func `parses bytes without a zone`() throws {
-            let scoped = try IETF.RFC.`4007`.IPv6.ScopedAddress(ascii: "2001:db8::1" as [Byte])
+            let scoped = try IETF.RFC.`4007`.IPv6.Address(ascii: "2001:db8::1" as [Byte])
             #expect(scoped.address == IETF.RFC.`4291`.IPv6.Address(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1))
             #expect(scoped.zone == nil)
         }
 
         @Test
         func `serializes the canonical address and the zone after a percent sign`() throws {
-            let scoped = IETF.RFC.`4007`.IPv6.ScopedAddress(
+            let scoped = IETF.RFC.`4007`.IPv6.Address(
                 address: IETF.RFC.`4291`.IPv6.Address(0xff02, 0, 0, 0, 0, 0, 0, 1),
-                zone: try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone("eth0")
+                zone: try IETF.RFC.`4007`.IPv6.Address.Zone("eth0")
             )
             #expect(scoped.serialized == "ff02::1%eth0")
         }
@@ -149,25 +149,25 @@
                 "::",
             ]
             for text in golden {
-                let parsed = try IETF.RFC.`4007`.IPv6.ScopedAddress(ascii: [Byte](utf8: text))
+                let parsed = try IETF.RFC.`4007`.IPv6.Address(ascii: [Byte](utf8: text))
                 #expect(String(parsed) == text)
-                #expect(try IETF.RFC.`4007`.IPv6.ScopedAddress(ascii: parsed.serialized) == parsed)
+                #expect(try IETF.RFC.`4007`.IPv6.Address(ascii: parsed.serialized) == parsed)
             }
         }
 
         @Test
         func `malformed inputs throw`() {
-            #expect(throws: IETF.RFC.`4007`.IPv6.ScopedAddress.Error.empty) {
-                try IETF.RFC.`4007`.IPv6.ScopedAddress(ascii: "" as [Byte])
+            #expect(throws: IETF.RFC.`4007`.IPv6.Address.Error.empty) {
+                try IETF.RFC.`4007`.IPv6.Address(ascii: "" as [Byte])
             }
-            #expect(throws: IETF.RFC.`4007`.IPv6.ScopedAddress.Error.missingZone) {
-                try IETF.RFC.`4007`.IPv6.ScopedAddress(ascii: "fe80::1%" as [Byte])
+            #expect(throws: IETF.RFC.`4007`.IPv6.Address.Error.missingZone) {
+                try IETF.RFC.`4007`.IPv6.Address(ascii: "fe80::1%" as [Byte])
             }
-            #expect(throws: IETF.RFC.`4007`.IPv6.ScopedAddress.Error.missingAddress) {
-                try IETF.RFC.`4007`.IPv6.ScopedAddress(ascii: "%eth0" as [Byte])
+            #expect(throws: IETF.RFC.`4007`.IPv6.Address.Error.missingAddress) {
+                try IETF.RFC.`4007`.IPv6.Address(ascii: "%eth0" as [Byte])
             }
-            #expect(throws: IETF.RFC.`4007`.IPv6.ScopedAddress.Error.invalidZone(.invalidCharacter("eth 0", byte: 0x20))) {
-                try IETF.RFC.`4007`.IPv6.ScopedAddress(ascii: "fe80::1%eth 0" as [Byte])
+            #expect(throws: IETF.RFC.`4007`.IPv6.Address.Error.invalidZone(.invalidCharacter("eth 0", byte: 0x20))) {
+                try IETF.RFC.`4007`.IPv6.Address(ascii: "fe80::1%eth 0" as [Byte])
             }
         }
     }
@@ -176,9 +176,9 @@
 
         @Test
         func `a link-local address with a zone reads as RFC 4007 section 11.7 text`() throws {
-            let scoped = IETF.RFC.`4007`.IPv6.ScopedAddress(
+            let scoped = IETF.RFC.`4007`.IPv6.Address(
                 address: IETF.RFC.`4291`.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1),
-                zone: try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone("eth0")
+                zone: try IETF.RFC.`4007`.IPv6.Address.Zone("eth0")
             )
             #expect(String(scoped) == "fe80::1%eth0")
             #expect(scoped.description == "fe80::1%eth0")
@@ -186,60 +186,60 @@
 
         @Test
         func `a numeric zone reads as text`() throws {
-            let scoped = IETF.RFC.`4007`.IPv6.ScopedAddress(
+            let scoped = IETF.RFC.`4007`.IPv6.Address(
                 address: IETF.RFC.`4291`.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1),
-                zone: try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone("1")
+                zone: try IETF.RFC.`4007`.IPv6.Address.Zone("1")
             )
             #expect(String(scoped) == "fe80::1%1")
         }
 
         @Test
         func `a global address without a zone has no percent sign`() {
-            let scoped = IETF.RFC.`4007`.IPv6.ScopedAddress(address: IETF.RFC.`4291`.IPv6.Address(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1))
+            let scoped = IETF.RFC.`4007`.IPv6.Address(address: IETF.RFC.`4291`.IPv6.Address(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1))
             #expect(String(scoped) == "2001:db8::1")
         }
 
         @Test
         func `a global address with a zone still carries the zone`() throws {
-            let scoped = IETF.RFC.`4007`.IPv6.ScopedAddress(
+            let scoped = IETF.RFC.`4007`.IPv6.Address(
                 address: IETF.RFC.`4291`.IPv6.Address(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1),
-                zone: try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone("eth0")
+                zone: try IETF.RFC.`4007`.IPv6.Address.Zone("eth0")
             )
             #expect(String(scoped) == "2001:db8::1%eth0")
         }
 
         @Test
         func `the unspecified address reads as two colons`() {
-            let scoped = IETF.RFC.`4007`.IPv6.ScopedAddress(address: IETF.RFC.`4291`.IPv6.Address.unspecified)
+            let scoped = IETF.RFC.`4007`.IPv6.Address(address: IETF.RFC.`4291`.IPv6.Address.unspecified)
             #expect(String(scoped) == "::")
         }
 
         @Test
         func `the same address on two interfaces reads differently`() throws {
             let address = IETF.RFC.`4291`.IPv6.Address(0xfe80, 0, 0, 0, 0x0200, 0x5eff, 0xfe00, 0x0001)
-            #expect(String(IETF.RFC.`4007`.IPv6.ScopedAddress(address: address, zone: try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone("eth0"))) == "fe80::200:5eff:fe00:1%eth0")
-            #expect(String(IETF.RFC.`4007`.IPv6.ScopedAddress(address: address, zone: try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone("eth1"))) == "fe80::200:5eff:fe00:1%eth1")
+            #expect(String(IETF.RFC.`4007`.IPv6.Address(address: address, zone: try IETF.RFC.`4007`.IPv6.Address.Zone("eth0"))) == "fe80::200:5eff:fe00:1%eth0")
+            #expect(String(IETF.RFC.`4007`.IPv6.Address(address: address, zone: try IETF.RFC.`4007`.IPv6.Address.Zone("eth1"))) == "fe80::200:5eff:fe00:1%eth1")
         }
 
         @Test
         func `a raw value round-trips through the canonical text`() throws {
-            let scoped = IETF.RFC.`4007`.IPv6.ScopedAddress(
+            let scoped = IETF.RFC.`4007`.IPv6.Address(
                 address: IETF.RFC.`4291`.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1),
-                zone: try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone("eth0")
+                zone: try IETF.RFC.`4007`.IPv6.Address.Zone("eth0")
             )
             #expect(scoped.rawValue == "fe80::1%eth0")
-            #expect(IETF.RFC.`4007`.IPv6.ScopedAddress(rawValue: "fe80::1%eth0") == scoped)
-            #expect(IETF.RFC.`4007`.IPv6.ScopedAddress(rawValue: "not an address") == nil)
+            #expect(IETF.RFC.`4007`.IPv6.Address(rawValue: "fe80::1%eth0") == scoped)
+            #expect(IETF.RFC.`4007`.IPv6.Address(rawValue: "not an address") == nil)
         }
 
         @Test
         func `a lossless string conversion round-trips`() throws {
-            let scoped = IETF.RFC.`4007`.IPv6.ScopedAddress(
+            let scoped = IETF.RFC.`4007`.IPv6.Address(
                 address: IETF.RFC.`4291`.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1),
-                zone: try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone("eth0")
+                zone: try IETF.RFC.`4007`.IPv6.Address.Zone("eth0")
             )
-            #expect(IETF.RFC.`4007`.IPv6.ScopedAddress("fe80::1%eth0") == scoped)
-            #expect(IETF.RFC.`4007`.IPv6.ScopedAddress("fe80::1%") == nil)
+            #expect(IETF.RFC.`4007`.IPv6.Address("fe80::1%eth0") == scoped)
+            #expect(IETF.RFC.`4007`.IPv6.Address("fe80::1%") == nil)
         }
     }
 #endif

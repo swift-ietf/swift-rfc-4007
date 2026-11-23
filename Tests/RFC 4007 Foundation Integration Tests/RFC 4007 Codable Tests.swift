@@ -6,13 +6,13 @@
     import Testing
 
     @Suite
-    struct `IETF.RFC.4007.IPv6.ScopedAddress+Codable Tests` {
+    struct `IETF.RFC.4007.IPv6.Address+Codable Tests` {
 
         @Test
         func `a scoped address codes as its address and zone`() async throws {
-            let scoped = IETF.RFC.`4007`.IPv6.ScopedAddress(
+            let scoped = IETF.RFC.`4007`.IPv6.Address(
                 address: IETF.RFC.`4291`.IPv6.Address(0xfe80, 0, 0, 0, 0, 0, 0, 1),
-                zone: try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone("eth0")
+                zone: try IETF.RFC.`4007`.IPv6.Address.Zone("eth0")
             )
 
             let encoder = JSONEncoder()
@@ -20,19 +20,19 @@
             let encoded = try encoder.encode(scoped)
 
             #expect(String(decoding: encoded, as: UTF8.self) == #"{"address":"fe80::1","zone":"eth0"}"#)
-            #expect(try JSONDecoder().decode(IETF.RFC.`4007`.IPv6.ScopedAddress.self, from: encoded) == scoped)
+            #expect(try JSONDecoder().decode(IETF.RFC.`4007`.IPv6.Address.self, from: encoded) == scoped)
         }
 
         @Test
         func `a scoped address without a zone omits the zone key`() async throws {
-            let scoped = IETF.RFC.`4007`.IPv6.ScopedAddress(
+            let scoped = IETF.RFC.`4007`.IPv6.Address(
                 address: IETF.RFC.`4291`.IPv6.Address(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1)
             )
 
             let encoded = try JSONEncoder().encode(scoped)
 
             #expect(String(decoding: encoded, as: UTF8.self) == #"{"address":"2001:db8::1"}"#)
-            #expect(try JSONDecoder().decode(IETF.RFC.`4007`.IPv6.ScopedAddress.self, from: encoded) == scoped)
+            #expect(try JSONDecoder().decode(IETF.RFC.`4007`.IPv6.Address.self, from: encoded) == scoped)
         }
 
         @Test
@@ -40,7 +40,7 @@
             let encoded = Data(#"{"address":"fe80::1","zone":"eth 0"}"#.utf8)
 
             #expect(throws: DecodingError.self) {
-                try JSONDecoder().decode(IETF.RFC.`4007`.IPv6.ScopedAddress.self, from: encoded)
+                try JSONDecoder().decode(IETF.RFC.`4007`.IPv6.Address.self, from: encoded)
             }
         }
 
@@ -49,7 +49,7 @@
             let encoded = Data(#"{"address":"not an address","zone":"eth0"}"#.utf8)
 
             #expect(throws: DecodingError.self) {
-                try JSONDecoder().decode(IETF.RFC.`4007`.IPv6.ScopedAddress.self, from: encoded)
+                try JSONDecoder().decode(IETF.RFC.`4007`.IPv6.Address.self, from: encoded)
             }
         }
     }

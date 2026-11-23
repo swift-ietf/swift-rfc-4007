@@ -7,7 +7,7 @@
     import RFC_5952
     import RFC_5952
 
-    extension IETF.RFC.`4007`.IPv6.ScopedAddress: ASCII.Parseable {
+    extension IETF.RFC.`4007`.IPv6.Address: ASCII.Parseable {
 
         public init<Bytes: Swift::Collection>(ascii bytes: Bytes) throws(Error)
         where Bytes.Element == Byte {
@@ -46,7 +46,7 @@
         }
     }
 
-    extension IETF.RFC.`4007`.IPv6.ScopedAddress: ASCII.Serializable, Binary.Serializable {
+    extension IETF.RFC.`4007`.IPv6.Address: ASCII.Serializable, Binary.Serializable {
 
         public static func serialize<Buffer: RangeReplaceableCollection>(
             _ scopedAddress: Self,

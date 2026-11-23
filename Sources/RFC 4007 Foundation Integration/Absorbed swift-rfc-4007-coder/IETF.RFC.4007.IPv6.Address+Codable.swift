@@ -7,7 +7,7 @@
     import RFC_5952
     import Serializer
 
-    extension IETF.RFC.`4007`.IPv6.ScopedAddress: Encodable, Decodable {
+    extension IETF.RFC.`4007`.IPv6.Address: Encodable, Decodable {
 
         private enum CodingKeys: String, CodingKey {
             case address
@@ -27,10 +27,10 @@
                     debugDescription: "\(error)"
                 )
             }
-            let zone: IETF.RFC.`4007`.IPv6.ScopedAddress.Zone?
+            let zone: IETF.RFC.`4007`.IPv6.Address.Zone?
             if let text = try container.decodeIfPresent(String.self, forKey: .zone) {
-                do throws(IETF.RFC.`4007`.IPv6.ScopedAddress.Zone.Error) {
-                    zone = try IETF.RFC.`4007`.IPv6.ScopedAddress.Zone(text)
+                do throws(IETF.RFC.`4007`.IPv6.Address.Zone.Error) {
+                    zone = try IETF.RFC.`4007`.IPv6.Address.Zone(text)
                 } catch {
                     throw DecodingError.dataCorruptedError(
                         forKey: .zone,
